@@ -38,7 +38,7 @@ public:
 	
 	UFUNCTION()
 	// Deal damage and return true if owner had died.
-	bool TakeDamage(float damage);
+	bool ApplyDamage(float damage);
 
 	UFUNCTION()
 	void SetIsAttacking(bool attacking);
@@ -54,7 +54,7 @@ public:
 	bool IsAttacking;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	bool AttackAnimActive = false;;
+	bool AttackAnimActive = false;
 
 	std::function<void(ABaseFightingCharacter*)> DeadCallback;
 

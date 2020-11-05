@@ -2,17 +2,54 @@
 
 
 #include "AgentServer.h"
+#include "AgentSession.h"
 
-AgentServer::AgentServer()
+AgentServer::AgentServer(boost::asio::io_context& io_context, std::vector<AAgentPlayerController*> AgentControllers)
+	: acceptor_(io_context, tcp::endpoint(tcp::v4(), 12001)),
+	AgentControllers(AgentControllers)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::FromInt(AgentControllers.size()));
+	}
+	StartListening();
 }
 
 AgentServer::~AgentServer()
 {
 }
 
-void AgentServer::StartServer()
+
+void AgentServer::StartListening()
 {
-	Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("StartListening"));
+	}
+	
+	//boost::asio::io_context io_context;
+	acceptor_.async_accept(
+		[this](boost::system::error_code ec, tcp::socket socket)
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("ACCEPTING"));
+			}
+			if (!ec && AgentControllers.size() > 0)
+			{
+				std::make_shared<AgentSession>(std::move(socket), AgentControllers.back())->StartSession();
+				//AgentControllers.pop_back();
+			}
+			StartListening();
+		});
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("DONE LISTENING"));
+	}
+	//io_context.run();
 }
 
+void AcceptConnection()
+{
+
+}

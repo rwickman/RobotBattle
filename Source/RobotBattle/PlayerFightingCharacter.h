@@ -6,6 +6,8 @@
 #include "BaseFightingCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "AgentStateCapture.h"
+#include "RewardManagerComponent.h"
 #include "PlayerFightingCharacter.generated.h"
 
 /**
@@ -39,7 +41,25 @@ public:
 	UFUNCTION()
 	void StopJump();
 
+	UFUNCTION()
+	UAgentStateCapture* GetAgentView() const;
+
+	// Called when damage was dealt to an enemy
+	//UFUNCTION()
+	//void DamageDealt(float Damage);
+	
 	// FPS camera.
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FPSCameraComponent;
+
+	
+
+protected:
+	UPROPERTY()
+	UAgentStateCapture* AgentView;
+
+	UPROPERTY()
+	URewardManagerComponent* RewardManager;
+
+
 };

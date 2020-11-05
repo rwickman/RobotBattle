@@ -2,21 +2,38 @@
 
 #pragma once
 
-#include "SocketSubsystem.h"
-#include "Sockets.h"
+#include <vector>
+
+THIRD_PARTY_INCLUDES_START
+#pragma push_macro("check")
+#undef check
+
+#pragma push_macro("TEXT")
+#undef TEXT
+
+#include <boost/asio.hpp>
+
+#pragma pop_macro("check")
+#pragma pop_macro("TEXT")
+THIRD_PARTY_INCLUDES_END
+#include "AgentPlayerController.h"
 #include "CoreMinimal.h"
 
-/**
- * 
- */
+using boost::asio::ip::tcp;
+
+
 class ROBOTBATTLE_API AgentServer
 {
 public:
-	AgentServer();
+	AgentServer(boost::asio::io_context& io_context, std::vector<AAgentPlayerController*> AgentControllers);
 	~AgentServer();
 
-	void StartServer();
+	void StartListening();
+
 
 private:
-	FSocket* Socket;
+	void AcceptConnection();
+	tcp::acceptor acceptor_;
+	std::vector<AAgentPlayerController*> AgentControllers;
+
 };

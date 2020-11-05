@@ -17,6 +17,12 @@ APlayerFightingCharacter::APlayerFightingCharacter()
 
 	// Enable the pawn to control camera rotation.
 	FPSCameraComponent->bUsePawnControlRotation = true;
+
+	// Create AgentView to capture agent state
+	AgentView = CreateDefaultSubobject<UAgentStateCapture>(TEXT("AgentView"));
+
+	// Create RewardManager to manage rewards on agent
+	RewardManager = CreateDefaultSubobject<URewardManagerComponent>(TEXT("RewardManager"));
 }
 
 void APlayerFightingCharacter::BeginPlay()
@@ -51,4 +57,9 @@ void APlayerFightingCharacter::StartJump()
 void APlayerFightingCharacter::StopJump()
 {
 	bPressedJump = false;
+}
+
+UAgentStateCapture* APlayerFightingCharacter::GetAgentView() const
+{
+	return AgentView;
 }

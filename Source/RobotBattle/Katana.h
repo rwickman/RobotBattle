@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
@@ -48,7 +50,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float DPS = 0.43f;
 
-
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* katanaMesh;
 
@@ -58,7 +59,8 @@ public:
 	UPROPERTY()
 	float TimeSinceAttack = 0.0f;
 
-	
+	//std::function<void(ABaseFightingCharacter*) 
+
 protected:
 	bool IsOwnerAttacking = false;
 	TSet<uint32> HurtEnemies;

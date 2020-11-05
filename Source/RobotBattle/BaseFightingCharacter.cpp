@@ -52,7 +52,7 @@ void ABaseFightingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 }
 
-bool ABaseFightingCharacter::TakeDamage(float damage)
+bool ABaseFightingCharacter::ApplyDamage(float damage)
 {
 	bool died = healthManager->TakeDamage(damage);
 	if (died)

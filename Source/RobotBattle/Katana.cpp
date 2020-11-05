@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BaseFightingCharacter.h"
 #include "Katana.h"
-
+#include "BaseFightingCharacter.h"
 
 // Sets default values
 AKatana::AKatana()
@@ -72,7 +71,7 @@ void AKatana::OnOverlapBegin(
 		if (FightCharacter)
 		{
 			HurtEnemies.Add(OtherComp->GetUniqueID());
-			FightCharacter->TakeDamage(damagePoints);
+			FightCharacter->ApplyDamage(damagePoints);
 		}
 	}
 }
