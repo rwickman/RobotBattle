@@ -38,15 +38,22 @@ void APlayerFightingCharacter::Tick(float DeltaTime)
 void APlayerFightingCharacter::MoveForward(float Value)
 {
 	// Find out which way is "forward" and record that the player wants to move that way.
-	FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-	AddMovementInput(direction, Value);
+	if (Controller)
+	{
+		FVector direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
+		AddMovementInput(direction, Value);
+	}
+	
 }
 
 void APlayerFightingCharacter::MoveRight(float Value)
 {
-	// Find out which way is "right" and record that the player wants to move that way.
-	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(Direction, Value);
+	if (Controller)
+	{
+		// Find out which way is "right" and record that the player wants to move that way.
+		FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
+		AddMovementInput(Direction, Value);
+	}
 }
 
 void APlayerFightingCharacter::StartJump()
@@ -63,3 +70,27 @@ UAgentStateCapture* APlayerFightingCharacter::GetAgentView() const
 {
 	return AgentView;
 }
+
+URewardManagerComponent* APlayerFightingCharacter::GetRewardManager() const
+{
+	return RewardManager;
+}
+
+
+bool APlayerFightingCharacter::ApplyDamage(float Damage)
+{
+	bool Died = Super::ApplyDamage(Damage);
+	RewardManager->DamageTaken(Damage);
+	return Died;
+}
+
+void APlayerFightingCharacter::DamageDealt(float Damage, bool EnemyKilled)
+{
+	Super::DamageDealt(Damage, EnemyKilled);
+	RewardManager->DamageDealt(Damage);
+	if (EnemyKilled)
+	{
+		RewardManager->EnemyKilled();
+	}
+}
+

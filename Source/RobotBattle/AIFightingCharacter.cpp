@@ -83,12 +83,21 @@ void AAIFightingCharacter::RandomMove()
 
 void AAIFightingCharacter::MoveToActor(AActor* Goal)
 {
-	if (Controller)
+	if (Controller && Goal)
 	{
 		GoalActor = Goal;
-		Cast<AAIController>(Controller)->MoveToActor(Goal);
-		GoalLocation = Goal->GetActorLocation();
-		TargetSet = true;
+		if (Controller)
+		{
+			AAIController* AIController = Cast<AAIController>(Controller);
+			if (AIController)
+			{
+				AIController->MoveToActor(Goal);
+				GoalLocation = Goal->GetActorLocation();
+				TargetSet = true;
+			}
+		}
+		
+		
 	}
 	else
 	{

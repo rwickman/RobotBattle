@@ -10,9 +10,11 @@ void ARobotBattleGameModeBase::StartPlay()
 	Super::StartPlay();
 	FActorSpawnParameters ManagerSpawnParams;
 	ManagerSpawnParams.Name = TEXT("AgentManager");
-	AAgentPlayerController* AgentPlayerController = NewObject<AAgentPlayerController>(this);
+	UWorld* World = GetWorld();
+	AAgentPlayerController* AgentPlayerController = World->SpawnActor<AAgentPlayerController>(AAgentPlayerController::StaticClass());
 	if (AgentPlayerController)
 	{
+		AgentPlayerController->SetupCallback = [&]() { SetupGame(0); };
 		AgentControllers.push_back(AgentPlayerController);
 	}
 	else
@@ -20,18 +22,18 @@ void ARobotBattleGameModeBase::StartPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Couldn't Create agent controller!"));
 	}
 	
-	UWorld* World = GetWorld();
+	
 	if (World)
 	{
 		AgentManager_ = World->SpawnActor<AAgentManager>(AAgentManager::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, ManagerSpawnParams);
 		AgentManager_->AgentControllers = &AgentControllers;
 	}
 	
-	SetupGame();
+	SetupGame(0);
 	
 }
 
-void ARobotBattleGameModeBase::SetupGame()
+void ARobotBattleGameModeBase::SetupGame(int ControllerIndex)
 {
 	UWorld* World = GetWorld();
 	if (World)
@@ -49,28 +51,47 @@ void ARobotBattleGameModeBase::SetupGame()
 			spawn_params.NameMode = FActorSpawnParameters::ESpawnActorNameMode::Requested;
 			FVector create_loc(1044.0f, 35.0f, 120.000008f);
 
-			created_player = World->SpawnActor<APlayerFightingCharacter>(AgentPlayerClass, create_loc, FRotator::ZeroRotator, spawn_params);
-			if (created_player)
+			APlayerFightingCharacter* AgentFighter= World->SpawnActor<APlayerFightingCharacter>(AgentPlayerClass, create_loc, FRotator::ZeroRotator, spawn_params);
+			if (AgentFighter)
 			{
-				
-				if (AgentControllers.size() > 0 && AgentControllers[0])
+				if (AgentFighters.Num() > ControllerIndex)
 				{
-					AgentControllers[0]->Possess(created_player);	
+					AgentFighters[ControllerIndex] = AgentFighter;
+				}
+				else
+				{
+					AgentFighters.Add(AgentFighter);
+				}
+				
+				if (AgentControllers.size() > ControllerIndex && AgentControllers[ControllerIndex])
+				{
+					AgentControllers[ControllerIndex]->Possess(AgentFighter);
+					//AgentControllers[ControllerIndex]->Setup();
 				}
 	
-				created_player->SetActorLabel(TEXT("PlayerAgentCharacter"));
+				AgentFighter->SetActorLabel(TEXT("PlayerAgentCharacter"));
 				//created_player->ShouldRandomMove = true;
-				created_player->DeadCallback = [&](ABaseFightingCharacter* DeadPlayer) {ARobotBattleGameModeBase::RestartGame(DeadPlayer); };
+				AgentFighter->DeadCallback = [&, ControllerIndex](ABaseFightingCharacter* DeadPlayer) {ARobotBattleGameModeBase::RestartGame(DeadPlayer, ControllerIndex); };
 			}
 			
 
 			spawn_params.Name = TEXT("AgentPlayerCharacter");
 			FVector create_loc2(178.0f, 840.0f, 120.000008f);
-			other_player = World->SpawnActor<AAIFightingCharacter>(AIPlayerClass, create_loc2, FRotator::ZeroRotator, spawn_params);
-			if (other_player && created_player)
+			AAIFightingCharacter* AIFighter = World->SpawnActor<AAIFightingCharacter>(AIPlayerClass, create_loc2, FRotator::ZeroRotator, spawn_params);
+			if (AIFighter && AgentFighter)
 			{
-				other_player->MoveToActor(created_player);
-				other_player->DeadCallback = [&](ABaseFightingCharacter* DeadPlayer) {ARobotBattleGameModeBase::RestartGame(DeadPlayer); };
+				AIFighter->MoveToActor(AgentFighter);
+				AIFighter->DeadCallback = [&, ControllerIndex](ABaseFightingCharacter* DeadPlayer) {ARobotBattleGameModeBase::RestartGame(DeadPlayer, ControllerIndex); };
+				
+				if (AIFighters.Num() > ControllerIndex)
+				{
+					AIFighters[ControllerIndex] = AIFighter;
+				}
+				else
+				{
+					AIFighters.Add(AIFighter);
+				}
+				
 			}
 		}
 		else
@@ -90,19 +111,22 @@ void ARobotBattleGameModeBase::SetupGame()
 	}
 }
 
-void ARobotBattleGameModeBase::RestartGame(ABaseFightingCharacter* DeadPlayer)
+void ARobotBattleGameModeBase::RestartGame(ABaseFightingCharacter* DeadPlayer, int EnvironmentID)
 {
-	if (DeadPlayer == created_player)
+	AAgentPlayerController* DeadPlayerController = Cast<AAgentPlayerController>(DeadPlayer->Controller);
+
+	if (DeadPlayerController)
 	{
-		other_player->DestroyCharacter();
+		DeadPlayerController->TerminateEpisode();
+		AIFighters[EnvironmentID]->DestroyCharacter();
 	}
 	else
 	{
-		created_player->DestroyCharacter();
+		DeadPlayerController = Cast<AAgentPlayerController>(AgentFighters[EnvironmentID]->Controller);
+		DeadPlayerController->TerminateEpisode();
+		AgentFighters[EnvironmentID]->DestroyCharacter();
 	}
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("CALLED RESTART GAME!"));
-	}
-	SetupGame();
+	// TODO: Replace this with a call in AgentSession
+	//DeadPlayerController->Setup();
+	//SetupGame(EnvironmentID);
 }

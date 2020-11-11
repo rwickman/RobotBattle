@@ -41,15 +41,28 @@ float URewardManagerComponent::ConsumeReward()
 
 void URewardManagerComponent::DamageDealt(float Damage)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("Adding reward for DamageDealt"));
+	}
 	CurrentReward += Damage * Reward::HurtEnemy;
 }
 
 
 void URewardManagerComponent::DamageTaken(float Damage)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("Adding reward for DamageTaken"));
+	}
 	CurrentReward += Damage * Reward::HurtAgent;
 }
 
+
+void URewardManagerComponent::EnemyKilled()
+{
+	CurrentReward += Reward::EnemyKilled;
+}
 
 void URewardManagerComponent::GameEnd(bool GameWon)
 {

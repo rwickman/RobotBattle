@@ -59,7 +59,7 @@ public:
 	UPROPERTY()
 	float TimeSinceAttack = 0.0f;
 
-	//std::function<void(ABaseFightingCharacter*) 
+	std::function<void(float, bool)> DamageDealtCallback; 
 
 protected:
 	bool IsOwnerAttacking = false;

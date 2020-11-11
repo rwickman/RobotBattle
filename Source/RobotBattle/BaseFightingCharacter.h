@@ -36,9 +36,6 @@ public:
 	UFUNCTION(BlueprintPure, Category="Health")
 	float GetHealthPoints();
 	
-	UFUNCTION()
-	// Deal damage and return true if owner had died.
-	bool ApplyDamage(float damage);
 
 	UFUNCTION()
 	void SetIsAttacking(bool attacking);
@@ -70,6 +67,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartAttackAnim();
 
+	UFUNCTION()
+	// Deal damage and return true if owner had died.
+	virtual bool ApplyDamage(float damage);
+
+	virtual void DamageDealt(float Damage, bool EnemyKilled);
+
 protected:
 	UFUNCTION()
 	void Die();
@@ -79,4 +82,6 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	AKatana* katana;
+
+	bool ShouldTriggerDeath;
 };

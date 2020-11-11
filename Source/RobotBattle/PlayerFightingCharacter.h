@@ -44,14 +44,18 @@ public:
 	UFUNCTION()
 	UAgentStateCapture* GetAgentView() const;
 
+	UFUNCTION()
+	URewardManagerComponent* GetRewardManager() const;
+
+	// Deal damage and return true if owner had died.
+	virtual bool ApplyDamage(float Damage) override;
+
 	// Called when damage was dealt to an enemy
-	//UFUNCTION()
-	//void DamageDealt(float Damage);
+	virtual void DamageDealt(float Damage, bool EnemyKilled) override;
 	
 	// FPS camera.
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FPSCameraComponent;
-
 	
 
 protected:

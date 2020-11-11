@@ -11,8 +11,9 @@ enum Reward
 {
 	HurtEnemy = 1,
 	HurtAgent = -1,
-	Won = 10,
-	Lost = -10
+	EnemyKilled = 10,
+	Won = 100,
+	Lost = -100
 };
 
 
@@ -36,11 +37,14 @@ public:
 	// Get the current reward and reset it
 	float ConsumeReward();
 
-	// Adds rewardfor damage dealt to enemies
+	// Adds reward for damage dealt to enemies
 	void DamageDealt(float Damage);
 
 	// Adds reward for damage dealt to agent
 	void DamageTaken(float Damage);
+
+	// Adds reward for enemy killed
+	void EnemyKilled();
 
 	// Adds reward for either game won or lost
 	void GameEnd(bool GameWon);

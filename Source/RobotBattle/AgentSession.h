@@ -15,12 +15,15 @@ THIRD_PARTY_INCLUDES_START
 #pragma pop_macro("TEXT")
 THIRD_PARTY_INCLUDES_END
 
-
 #include <cstdlib>
 #include <memory>
 #include <utility>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 #include "AgentPlayerController.h"
+#include "Packet.h"
 #include "CoreMinimal.h"
 
 using boost::asio::ip::tcp;
@@ -36,13 +39,27 @@ public:
 
 	void StartSession();
 
-private:
-	void ReadData();
-	void WriteData(std::size_t length);
+	bool SetupComplete = false;
+	bool StateCaptured = false;
 
+private:
+	void ReadActionHeader();
+	void ReadActionBody();
+	void ReadRestart();
+	void WriteState();
+	void EnableSetupComplete();
+	void EnableStateCaptured();
+	
 	tcp::socket socket_;
 	enum { max_length = 1024 };
-	char data_[max_length];
+	Packet DataPacket;
+	Packet ActionPacket;
+
+	
+	std::mutex io_Mutex;
+	std::condition_variable Setup_CV;
+	std::condition_variable State_CV;
+
 
 	AAgentPlayerController* AgentController;
 };

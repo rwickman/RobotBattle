@@ -2,6 +2,11 @@
 
 #pragma once
 
+#include <vector>
+
+THIRD_PARTY_INCLUDES_START
+#include <nlohmann/json.hpp>
+THIRD_PARTY_INCLUDES_END
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
@@ -20,13 +25,22 @@ struct FHitObject
 	float Health;
 	
 	UPROPERTY()
-	FVector Location;
+	float Location[3];
 	
 	UPROPERTY()
-	FRotator Rotation;
+	float Rotation[3];
 	
-	UPROPERTY()
-	TEnumAsByte<ObjType> Type;
+	ObjType Type;
+	/*
+	void to_json(nlohmann::json& j, const FHitObject& Hit) {
+		j = nlohmann::json{
+			{"Health",  Hit.Health},
+			{"Location", Hit.Location},
+			{"Rotation", Hit.Rotation},
+			{"Type", Hit.Type}
+		};
+	}
+	*/
 };
 
 USTRUCT()
@@ -34,11 +48,18 @@ struct FState
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
-	TArray<FHitObject> HitResults;
+	std::vector<FHitObject> HitResults;
 	
-	UPROPERTY()
 	FHitObject PlayerTransform;
+
+	/*
+	void to_json(nlohmann::json& j, const FState& State) {
+		j = nlohmann::json{
+			{"HitResults", State.HitResults},
+			{"PlayerTransform", State.PlayerTransform}
+		};
+	}
+	*/
 };
 
 
@@ -70,9 +91,14 @@ public:
 	float ViewDistance = 500.0f;
 
 	FState GetState();
+	
+	UPROPERTY()
+	FState CurState_;
+
+	bool ShouldGetState = false;
 
 private:
 	// Capture the view of the agent using linecast
-	TArray<FHitObject> CaptureView();
+	std::vector<FHitObject> CaptureView();
 
 };

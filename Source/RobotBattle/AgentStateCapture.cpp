@@ -31,6 +31,7 @@ void UAgentStateCapture::BeginPlay()
 void UAgentStateCapture::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	//CurState_ = GetState();
 	//TArray<FHitObject> View = CaptureView();
 }
 
@@ -48,10 +49,18 @@ FState UAgentStateCapture::GetState()
 		}
 		else
 		{
-			PlayerTransform.Health = -1.0f;
+			PlayerTransform.Health = 0.0f;
 		}
-		PlayerTransform.Location = Owner->GetActorLocation();
-		PlayerTransform.Rotation = Owner->GetActorRotation();
+		FVector PlayerLocation = Owner->GetActorLocation();
+		PlayerTransform.Location[0] = PlayerLocation.X;
+		PlayerTransform.Location[1] = PlayerLocation.Y;
+		PlayerTransform.Location[2] = PlayerLocation.Z;
+
+		FRotator PlayerRotation = Owner->GetActorRotation();
+		PlayerTransform.Rotation[0] = PlayerRotation.Pitch;
+		PlayerTransform.Rotation[1] = PlayerRotation.Yaw;
+		PlayerTransform.Rotation[2] = PlayerRotation.Roll;
+		
 		PlayerTransform.Type = ObjType::Player;
 	}
 	CurState.PlayerTransform = PlayerTransform;
@@ -59,10 +68,10 @@ FState UAgentStateCapture::GetState()
 	return CurState;
 }
 
-TArray<FHitObject> UAgentStateCapture::CaptureView()
+std::vector<FHitObject> UAgentStateCapture::CaptureView()
 {
 	AActor* Owner = GetOwner();
-	TArray<FHitObject> HitResults;
+	std::vector<FHitObject> HitResults;
 	UWorld * World = GetWorld();
 	if (Owner)
 	{
@@ -110,7 +119,7 @@ TArray<FHitObject> UAgentStateCapture::CaptureView()
 			{
 				AActor* HitActor = OutHit.GetActor();
 				FString HitName(HitActor->GetName());
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("The Component Being Hit is: %s"), *OutHit.GetActor()->GetName()));
+				//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("The Component Being Hit is: %s"), *OutHit.GetActor()->GetName()));
 				ABaseFightingCharacter* HitFighter = Cast<ABaseFightingCharacter>(HitActor);
 				if (HitFighter)
 				{
@@ -120,8 +129,16 @@ TArray<FHitObject> UAgentStateCapture::CaptureView()
 				{
 					CurHit.Health = -1.0f;
 				}
-				CurHit.Location = HitActor->GetActorLocation();
-				CurHit.Rotation = HitActor->GetActorRotation();
+				FVector HitLocation = HitActor->GetActorLocation();
+				CurHit.Location[0] = HitLocation.X;
+				CurHit.Location[1] = HitLocation.Y;
+				CurHit.Location[2] = HitLocation.Z;
+
+				FRotator HitRotation = HitActor->GetActorRotation();
+				CurHit.Rotation[0] = HitRotation.Pitch;
+				CurHit.Rotation[1] = HitRotation.Roll;
+				CurHit.Rotation[2] = HitRotation.Yaw;
+
 
 				// Set the type
 				// TODO: Optimize this to use the class instead
@@ -146,12 +163,18 @@ TArray<FHitObject> UAgentStateCapture::CaptureView()
 			else
 			{
 				CurHit.Health = 0.0f;
-				CurHit.Location = FVector::ZeroVector;
-				CurHit.Rotation = FRotator::ZeroRotator;
+				CurHit.Location[0] = 0;
+				CurHit.Location[1] = 0;
+				CurHit.Location[2] = 0;
+
+				CurHit.Rotation[0] = 0;
+				CurHit.Rotation[1] = 0;
+				CurHit.Rotation[2] = 0;
+
 				CurHit.Type = ObjType::Nothing;
 			}
 			// Add the information about the current linecast
-			HitResults.Add(CurHit);
+			HitResults.push_back(CurHit);
 		}
 		
 	}

@@ -31,6 +31,7 @@ void ABaseFightingCharacter::BeginPlay()
 			SpawnParams.Owner = this;
 			katana = World->SpawnActor<AKatana>(KatanaClass, socketLoc, socketRot, SpawnParams);
 			katana->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "hand_rSocket");
+			katana->DamageDealtCallback = [&](float Damage, bool EnemyKilled) { DamageDealt(Damage, EnemyKilled); };
 	}
 	else
 	{
@@ -42,6 +43,11 @@ void ABaseFightingCharacter::BeginPlay()
 void ABaseFightingCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (ShouldTriggerDeath)
+	{
+		ShouldTriggerDeath = false;
+		Die();
+	}
 	
 }
 
@@ -52,24 +58,21 @@ void ABaseFightingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 }
 
-bool ABaseFightingCharacter::ApplyDamage(float damage)
+bool ABaseFightingCharacter::ApplyDamage(float Damage)
 {
-	bool died = healthManager->TakeDamage(damage);
-	if (died)
-	{
-		Die();
-	}
-	// TODO: Should die after sends boolean that it is dying
-	return died;
+	ShouldTriggerDeath = healthManager->TakeDamage(Damage);
+	return ShouldTriggerDeath;
 }
 
 float ABaseFightingCharacter::GetHealthPoints()
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString("HEALTH PERCENT: ") + FString::SanitizeFloat(healthManager->GetHealthPercentage()));
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString("INSIDE BASE CHARACTER: ") + FString::SanitizeFloat(healthManager->GetHealthPoints()));
 	}
+	*/
 	return healthManager->GetHealthPoints();
 }
 
@@ -117,4 +120,9 @@ void ABaseFightingCharacter::ResetAttack()
 void ABaseFightingCharacter::StartAttackAnim()
 {
 	AttackAnimActive = true;
+}
+
+void ABaseFightingCharacter::DamageDealt(float Damage, bool EnemyKilled)
+{
+
 }

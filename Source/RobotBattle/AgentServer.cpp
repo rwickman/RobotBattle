@@ -42,10 +42,6 @@ void AgentServer::StartListening()
 			}
 			StartListening();
 		});
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("DONE LISTENING"));
-	}
 	//io_context.run();
 }
 

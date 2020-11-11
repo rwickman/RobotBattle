@@ -32,17 +32,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Character")
 	TSubclassOf <class ABaseFightingCharacter> AgentPlayerClass;
 
-	void SetupGame();
-	void RestartGame(ABaseFightingCharacter* DeadPlayer);
+	void SetupGame(int ControllerIndex);
+	void RestartGame(ABaseFightingCharacter* DeadPlayer, int EnvironmentID);
 	
 	std::vector<AAgentPlayerController*> AgentControllers;
 
 private:
-	APlayerFightingCharacter* created_player;
-	AAIFightingCharacter* other_player;
-
+	TArray<APlayerFightingCharacter*> AgentFighters; //created_player
+	TArray<AAIFightingCharacter*> AIFighters;
 
 	AAgentManager* AgentManager_;
-
-
 };

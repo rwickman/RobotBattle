@@ -71,7 +71,12 @@ void AKatana::OnOverlapBegin(
 		if (FightCharacter)
 		{
 			HurtEnemies.Add(OtherComp->GetUniqueID());
-			FightCharacter->ApplyDamage(damagePoints);
+			bool EnemyKilled = FightCharacter->ApplyDamage(damagePoints);
+			if (DamageDealtCallback)
+			{
+				DamageDealtCallback(damagePoints, EnemyKilled);
+			}
+			
 		}
 	}
 }

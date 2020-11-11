@@ -39,6 +39,8 @@ void AHumanPlayerController::SetupInputComponent()
 
 void AHumanPlayerController::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 }
 
 void AHumanPlayerController::MoveForward(float Value)

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <thread>
+
 THIRD_PARTY_INCLUDES_START
 #pragma push_macro("check")
 #undef check
@@ -20,7 +22,18 @@ THIRD_PARTY_INCLUDES_END
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "AgentPlayerController.h"
+#include "AgentServer.h"
 #include "AgentManager.generated.h"
+
+class A
+{
+public:
+	A(boost::asio::io_context& io_context, std::vector<AAgentPlayerController*>* ag) : io_context(io_context), AgentControllers(ag)
+	{
+	}
+	boost::asio::io_context& io_context;
+	std::vector<AAgentPlayerController*>* AgentControllers;
+};
 
 UCLASS()
 class ROBOTBATTLE_API AAgentManager : public AActor
@@ -30,6 +43,7 @@ class ROBOTBATTLE_API AAgentManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAgentManager();
+	~AAgentManager();
 
 protected:
 	// Called when the game starts or when spawned
@@ -42,5 +56,11 @@ public:
 	void StartServer();
 
 	std::vector<AAgentPlayerController*>* AgentControllers;
+	
+	boost::asio::io_context io_context;
+	
 
+protected:
+	std::thread* ServerThread;
+	bool StartedServer;
 };

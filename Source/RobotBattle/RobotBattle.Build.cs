@@ -8,7 +8,7 @@ public class RobotBattle : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "UMG", "Boost" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "UMG", "Boost", "Nlohmann" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
