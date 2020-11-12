@@ -66,6 +66,10 @@ void URewardManagerComponent::EnemyKilled()
 
 void URewardManagerComponent::GameEnd(bool GameWon)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("URewardManagerComponent::GameEnd"));
+	}
 	if (GameWon)
 	{
 		CurrentReward += Reward::Won;

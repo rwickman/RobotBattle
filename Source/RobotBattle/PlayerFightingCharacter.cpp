@@ -81,6 +81,10 @@ bool APlayerFightingCharacter::ApplyDamage(float Damage)
 {
 	bool Died = Super::ApplyDamage(Damage);
 	RewardManager->DamageTaken(Damage);
+	if (Died)
+	{
+		RewardManager->GameEnd(false);
+	}
 	return Died;
 }
 
@@ -91,6 +95,8 @@ void APlayerFightingCharacter::DamageDealt(float Damage, bool EnemyKilled)
 	if (EnemyKilled)
 	{
 		RewardManager->EnemyKilled();
+		RewardManager->GameEnd(true);
 	}
+
 }
 

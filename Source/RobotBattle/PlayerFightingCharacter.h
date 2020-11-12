@@ -54,7 +54,7 @@ public:
 	virtual void DamageDealt(float Damage, bool EnemyKilled) override;
 	
 	// FPS camera.
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* FPSCameraComponent;
 	
 

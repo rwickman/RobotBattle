@@ -55,8 +55,9 @@ private:
 	Packet DataPacket;
 	Packet ActionPacket;
 
-	
+	// TODO: Try to only use one mutex
 	std::mutex io_Mutex;
+	std::mutex io_Mutex_2;
 	std::condition_variable Setup_CV;
 	std::condition_variable State_CV;
 

@@ -29,7 +29,7 @@ void ARobotBattleGameModeBase::StartPlay()
 		AgentManager_->AgentControllers = &AgentControllers;
 	}
 	
-	SetupGame(0);
+	//SetupGame(0);
 	
 }
 
@@ -126,7 +126,4 @@ void ARobotBattleGameModeBase::RestartGame(ABaseFightingCharacter* DeadPlayer, i
 		DeadPlayerController->TerminateEpisode();
 		AgentFighters[EnvironmentID]->DestroyCharacter();
 	}
-	// TODO: Replace this with a call in AgentSession
-	//DeadPlayerController->Setup();
-	//SetupGame(EnvironmentID);
 }

@@ -13,6 +13,7 @@ void to_json(nlohmann::json& j, const FHitObject& Hit) {
 		{"Health",  Hit.Health},
 		{"Location", Hit.Location},
 		{"Rotation", Hit.Rotation},
+		{"IsAttacking", Hit.IsAttacking},
 		{"Type", Hit.Type}
 	};
 }
@@ -40,28 +41,35 @@ void AAgentPlayerController::BeginPlay()
 
 }
 
+void AAgentPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+}
+
 void AAgentPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	//CapturedState = GetState();
 	if (ShouldSetup)
 	{
 		ShouldSetup = false;
 		Setup();
 	}
-	CapturedState = GetState();
-	/*
+	
+	
 	if (ShouldGetState)
-	{
-		
-		
+	{	
+		CapturedState = GetState();
 		if (StateCapturedCallback)
 		{
 			StateCapturedCallback();
 		}
-	}*/
+		ShouldGetState = false;
+	}
 
 	PerformAction();
+	UpdateRotation(DeltaTime);
 }
 
 
@@ -132,23 +140,26 @@ std::string AAgentPlayerController::GetState()
 		{
 			if (!IsEpisodeTerminated)
 			{
-				CurStateRewardPair.State = PossessedFighter->GetAgentView()->GetState();
+				if (PossessedFighter->GetAgentView())
+				{
+					CurStateRewardPair.State = PossessedFighter->GetAgentView()->GetState();
+				}
+				if (PossessedFighter->GetRewardManager())
+				{
+					CurStateRewardPair.Reward = PossessedFighter->GetRewardManager()->ConsumeReward();
+				}
 			}
-
-			CurStateRewardPair.IsEpisodeTerminated = IsEpisodeTerminated;
-			CurStateRewardPair.Reward = PossessedFighter->GetRewardManager()->ConsumeReward();
 		}
 	}
-
+	if (IsEpisodeTerminated)
+	{
+		CurStateRewardPair.Reward = LastReward;
+	}
+	CurStateRewardPair.IsEpisodeTerminated = IsEpisodeTerminated;
 	nlohmann::json CurPairJson;
 	CurPairJson["StateRewardPair"] = CurStateRewardPair;
 	//CurPairJson["Reward"] = CurStateRewardPair.Reward;
 	//CurPairJson["IsEpisodeTerminated"] = CurStateRewardPair.IsEpisodeTerminated;
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, CurPairJson.dump().c_str());
-		
-	}
 	//CurPairJson["HitObject"]
 	// TODO: Remove this and replace HitResults with vector
 	//std::vector < std::vector > HitResults;
@@ -168,6 +179,10 @@ std::string AAgentPlayerController::GetState()
 
 void AAgentPlayerController::Setup()
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("AAgentPlayerController::Setup()"));
+	}
 	IsEpisodeTerminated = false;
 	IsActionPending = false;
 	if (SetupCallback)
@@ -186,6 +201,18 @@ void AAgentPlayerController::TerminateEpisode()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("Terminating Episode"));
 	}
+	APawn* PossessedPawn = GetPawn();
+	if (PossessedPawn)
+	{
+		APlayerFightingCharacter* PossessedFighter = Cast<APlayerFightingCharacter>(PossessedPawn);
+		if (PossessedFighter)
+		{
+			if (PossessedFighter->GetRewardManager())
+			{
+				LastReward = PossessedFighter->GetRewardManager()->ConsumeReward();
+			}
+		}
+	}
 	IsActionPending = false;
 	IsEpisodeTerminated = true;
 }
@@ -198,35 +225,41 @@ void AAgentPlayerController::PerformAction()
 		APlayerFightingCharacter* PossessedFighter = Cast<APlayerFightingCharacter>(PossessedPawn);
 		if (PossessedFighter)
 		{
-			if (IsActionPending)
+			if (GEngine)
 			{
-				IsActionPending = false;
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("PERFORMING ACTION"));
-				}
-				PossessedFighter->MoveForward(CurAction.MoveForward);
-				PossessedFighter->MoveRight(CurAction.MoveRight);
-				AddYawInput(CurAction.TurnRight);
-				AddPitchInput(CurAction.LookUp);
-				if (CurAction.Jump)
-				{
-					PossessedFighter->StartJump();
-				}
-				else
-				{
-					PossessedFighter->StopJump();
-				}
-
-				if (CurAction.Attack)
-				{
-					PossessedFighter->SetIsAttacking(true);
-				}
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("PERFORMING ACTION"));
+			}
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::SanitizeFloat(CurAction.TurnRight));
+			}
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::SanitizeFloat(CurAction.LookUp));
+			}
+			PossessedFighter->MoveForward(CurAction.MoveForward);
+			PossessedFighter->MoveRight(CurAction.MoveRight);
+			AddYawInput(CurAction.TurnRight);
+			AddPitchInput(CurAction.LookUp);
+			//AddYawInput(10.0f);
+			//AddPitchInput(1.0f);
+			if (CurAction.Jump)
+			{
+				PossessedFighter->StartJump();
 			}
 			else
 			{
 				PossessedFighter->StopJump();
 			}
+
+			if (CurAction.Attack)
+			{
+				PossessedFighter->SetIsAttacking(true);
+			}
+		}
+		else
+		{
+			PossessedFighter->StopJump();
 		}
 	}
 }

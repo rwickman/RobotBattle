@@ -29,18 +29,10 @@ struct FHitObject
 	
 	UPROPERTY()
 	float Rotation[3];
-	
+
+	bool IsAttacking = false;
+
 	ObjType Type;
-	/*
-	void to_json(nlohmann::json& j, const FHitObject& Hit) {
-		j = nlohmann::json{
-			{"Health",  Hit.Health},
-			{"Location", Hit.Location},
-			{"Rotation", Hit.Rotation},
-			{"Type", Hit.Type}
-		};
-	}
-	*/
 };
 
 USTRUCT()
@@ -51,15 +43,6 @@ struct FState
 	std::vector<FHitObject> HitResults;
 	
 	FHitObject PlayerTransform;
-
-	/*
-	void to_json(nlohmann::json& j, const FState& State) {
-		j = nlohmann::json{
-			{"HitResults", State.HitResults},
-			{"PlayerTransform", State.PlayerTransform}
-		};
-	}
-	*/
 };
 
 
@@ -88,7 +71,7 @@ public:
 	float ViewOffsetX = 25.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-	float ViewDistance = 500.0f;
+	float ViewDistance = 1000.0f;
 
 	FState GetState();
 	

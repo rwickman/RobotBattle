@@ -62,6 +62,7 @@ FState UAgentStateCapture::GetState()
 		PlayerTransform.Rotation[2] = PlayerRotation.Roll;
 		
 		PlayerTransform.Type = ObjType::Player;
+		PlayerTransform.IsAttacking = OwnerFighter->IsAttacking;
 	}
 	CurState.PlayerTransform = PlayerTransform;
 	CurState.HitResults = CaptureView();
@@ -124,6 +125,7 @@ std::vector<FHitObject> UAgentStateCapture::CaptureView()
 				if (HitFighter)
 				{
 					CurHit.Health = HitFighter->GetHealthPoints();
+					CurHit.IsAttacking = HitFighter->IsAttacking;
 				}
 				else
 				{

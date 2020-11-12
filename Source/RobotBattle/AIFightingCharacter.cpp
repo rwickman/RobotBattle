@@ -27,8 +27,6 @@ void AAIFightingCharacter::BeginPlay()
 void AAIFightingCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// TODO: Stop attacking when actor died
-	// TODO: Reset actors when one of them died
 	if (shouldMove)
 	{
 		if (ShouldRandomMove)
@@ -48,21 +46,7 @@ void AAIFightingCharacter::Tick(float DeltaTime)
 			
 		}
 		else if (GoalActor) {
-			GoalLocation = GoalActor->GetActorLocation();
-			float distance = FVector::Distance(GoalLocation, GetActorLocation());
-			if (distance <= StoppingDistance)
-			{
-				TargetSet = false;
-				SetIsAttacking(true);
-			}
-			else
-			{
-				SetIsAttacking(false);
-				if (!TargetSet)
-				{
-					MoveToActor(GoalActor);
-				}
-			}
+			MoveToActor(GoalActor);
 		}
 	}
 }
@@ -91,9 +75,15 @@ void AAIFightingCharacter::MoveToActor(AActor* Goal)
 			AAIController* AIController = Cast<AAIController>(Controller);
 			if (AIController)
 			{
-				AIController->MoveToActor(Goal);
-				GoalLocation = Goal->GetActorLocation();
-				TargetSet = true;
+
+				if (AIController->MoveToActor(Goal, StoppingDistance) == EPathFollowingRequestResult::Type::AlreadyAtGoal)
+				{
+					SetIsAttacking(true);
+				}
+				else
+				{
+					SetIsAttacking(false);
+				}
 			}
 		}
 		

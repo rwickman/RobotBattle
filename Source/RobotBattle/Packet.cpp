@@ -48,6 +48,7 @@ void Packet::SetBodyLength(std::size_t NewBodyLength)
 	{
 		BodyLength = MAX_BODY_LENGTH;
 	}
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::Printf(TEXT("IN SetBodyLength MAX_BODY_LENGTH is %d"), MAX_BODY_LENGTH) );
@@ -55,22 +56,25 @@ void Packet::SetBodyLength(std::size_t NewBodyLength)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::Printf(TEXT("IN SetBodyLength BodyLength is %d"), BodyLength) );
-	}
+	}*/
 }
 
 void Packet::SetBody(const char* BodyContent)
 {
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::Printf(TEXT("std::strlen(BodyContent) is %d"), std::strlen(BodyContent)));
 	}
+	*/
 	SetBodyLength(std::strlen(BodyContent));
 	std::memcpy(GetBody(), BodyContent, BodyLength);
 	EncodeHeader();
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::Printf(TEXT("After EncodeHeader BodyLength is %d"), BodyLength));
-	}
+	}*/
 }
 
 bool Packet::DecodeHeader()
@@ -78,10 +82,12 @@ bool Packet::DecodeHeader()
 	char Header[HEADER_LENGTH + 1] = "";
 	std::strncat(Header, Data, HEADER_LENGTH);
 	BodyLength = std::atoi(Header);
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::FromInt(BodyLength));
 	}
+	*/
 	if (BodyLength > MAX_BODY_LENGTH)
 	{
 		BodyLength = 0;

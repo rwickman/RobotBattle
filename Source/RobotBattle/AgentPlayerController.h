@@ -81,6 +81,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void SetupInputComponent() override;
+
 
 public:
 	// Called every frame
@@ -119,7 +121,6 @@ public:
 
 	std::string ConsumeState();
 
-
 	
 protected:
 	void PerformAction();
@@ -127,6 +128,6 @@ protected:
 	bool IsActionPending = false;
 	UPROPERTY()
 	bool ShouldGetState = false;
-
+	float LastReward = 0.0f;
 	FAction CurAction;
 };

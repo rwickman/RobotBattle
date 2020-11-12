@@ -42,7 +42,7 @@ public:
 	float RandomMoveRadius = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Navigation")
-	float StoppingDistance = 150.0f;
+	float StoppingDistance = 50.0f;
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Navigation")
