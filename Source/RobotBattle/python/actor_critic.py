@@ -1,5 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import Model, layers
+import numpy as np
+tf.keras.backend.set_floatx("float32")
+physical_devices = tf.config.list_physical_devices('GPU') 
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 VF_COEF = 0.01
 EPSILON_CLIP = 0.2
@@ -47,6 +51,7 @@ class ActorCritic(Model):
         self._obj_transform_emb = layers.Conv1D(self._args.obj_emb, kernel_size=1, strides=1, activation="relu") 
 
         self._flatten = layers.Flatten()
+
         self._dropout = layers.Dropout(self._args.dropout_rate)
         
         self._lstm_1 = layers.LSTM(self._args.lstm_units,
@@ -71,9 +76,9 @@ class ActorCritic(Model):
 
         # Add to the type emb to object representation
         obj_reps = self._concat([tf.cast(x[:, :, :-1], tf.float32), type_embs])
-        
+
         # Create the object embeddings
-        obj_reps = self._obj_transform_emb(obj_reps)
+        obj_reps = self._obj_transform_emb(tf.cast(obj_reps, tf.float32))
         obj_reps = self._flatten(obj_reps)
         obj_reps = self._dropout(obj_reps, training=training)
 
