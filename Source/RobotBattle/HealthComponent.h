@@ -40,7 +40,7 @@ public:
 
 
 private:
-	float healthPoints = 10.0f;
+	float healthPoints = 5.0f;
 
 
 };
