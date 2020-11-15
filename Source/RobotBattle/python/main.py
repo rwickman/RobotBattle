@@ -40,13 +40,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=1,
+    parser.add_argument("--epochs", type=int, default=3,
             help="Number of epochs to train on each episode.")
     parser.add_argument("--num_agents", type=int, default=2,
             help="Number of epochs to train on each episode.")
     parser.add_argument("--episodes", type=int, default=100000,
             help="Number of episodes to train on.")
-    parser.add_argument("--lr", type=float, default=1e-5,
+    parser.add_argument("--lr", type=float, default=5e-6,
             help="The learning rate.")
     parser.add_argument("--gamma", type=float, default=0.99,
             help="The learning rate.")

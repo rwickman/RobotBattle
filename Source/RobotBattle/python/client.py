@@ -25,20 +25,11 @@ class AgentClient:
         #print(state_reward_pair)
         return state_reward_pair 
                 
-                #     action = "{:4d}{}".format(ACTION_SIZE, "0000010010")
-                #     print(action)
-                #     print(len(action))
-                #     s.sendall(action.encode())
-                # else:
-                #     time.sleep(5)
-                #     print("SENDING RESTART SIGNAL")
-                #     s.sendall(b"  OK")
+
     def send_action(self, action):
          # Encode action as bit string with header size
         action_packet = "{0:4d}{1:010b}".format(10, action)
-        #action_packet ="{0:4d}{1}".format(10, "0100100100")
-        #print(action_packet)
-        # Send action to remote agent
+
         self._socket.sendall(action_packet.encode())
 
     def send_reset(self):
