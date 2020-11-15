@@ -75,13 +75,14 @@ void AAgentPlayerController::Tick(float DeltaTime)
 
 void AAgentPlayerController::SetAction(const FString Action)
 {
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, Action);
-	}
 	if (Action.Len() >= ActionSpaceLen)
 	{
+		/*
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, Action);
+		}
+		*/
 		CurAction = FAction();
 		if (Action[0] == '1')
 		{
@@ -225,10 +226,12 @@ void AAgentPlayerController::PerformAction()
 		APlayerFightingCharacter* PossessedFighter = Cast<APlayerFightingCharacter>(PossessedPawn);
 		if (PossessedFighter)
 		{
+			/*
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("PERFORMING ACTION"));
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, PossessedFighter->GetName());
 			}
+			
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::SanitizeFloat(CurAction.TurnRight));
@@ -237,6 +240,8 @@ void AAgentPlayerController::PerformAction()
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::SanitizeFloat(CurAction.LookUp));
 			}
+			*/
+			
 			PossessedFighter->MoveForward(CurAction.MoveForward);
 			PossessedFighter->MoveRight(CurAction.MoveRight);
 			AddYawInput(CurAction.TurnRight);

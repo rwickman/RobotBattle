@@ -25,16 +25,6 @@ THIRD_PARTY_INCLUDES_END
 #include "AgentServer.h"
 #include "AgentManager.generated.h"
 
-class A
-{
-public:
-	A(boost::asio::io_context& io_context, std::vector<AAgentPlayerController*>* ag) : io_context(io_context), AgentControllers(ag)
-	{
-	}
-	boost::asio::io_context& io_context;
-	std::vector<AAgentPlayerController*>* AgentControllers;
-};
-
 UCLASS()
 class ROBOTBATTLE_API AAgentManager : public AActor
 {

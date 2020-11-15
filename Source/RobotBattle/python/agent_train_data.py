@@ -13,9 +13,9 @@ class LocationID(Enum):
 class AgentTrainData:
     """Keeps track of various important train data import for one instance of an agent."""
     
-    def __init__(self, args, agent_data_json="model/agent_0_data.json"):
+    def __init__(self, args, agent_num=0):
         self._args = args
-        self._agent_data_json = agent_data_json
+        self._agent_data_json = "model/agent_{}_data.json".format(agent_num)
         self._setup()
 
     def _setup(self):

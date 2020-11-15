@@ -57,6 +57,7 @@ class RLAgent(Agent):
 
             # Create one-hot encoded action vector
             action_one_hot = np.zeros(self._args.action_space)
+            #print("action: ", action)
             action_one_hot[action] = 1
             actions.append(action_one_hot)
             
@@ -68,6 +69,7 @@ class RLAgent(Agent):
             
             # Check if episode is over (i.e., in terminal state)
             if self._is_episode_terminated(state_dict):
+                print(actor_pred)
                 break
                 
         
@@ -115,7 +117,7 @@ class RLAgent(Agent):
                         critic_pred,
                         ep_dict["returns"][t])
                     total_loss = actor_loss + critic_loss
-                    print("Total loss: ", total_loss)
+                    #print("Total loss: ", total_loss)
 
                 # Compute the gradients based on the local model
                 grads = tape.gradient(total_loss, self._local_model.trainable_variables)
@@ -141,7 +143,8 @@ class RLAgent(Agent):
         # Compute average loss
         avg_actor_loss = total_actor_loss / (ep_len * self._args.epochs)
         avg_critic_loss = total_critic_loss / (ep_len * self._args.epochs)
-        
+        print("avg_actor_loss: ", avg_actor_loss)
+        print("avg_critic_loss: ", avg_critic_loss)
         self._global_model.save_rl_episode(
             avg_actor_loss,
             avg_critic_loss,

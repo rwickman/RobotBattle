@@ -25,7 +25,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, Category = "Health")
-	float maxHealthPoints = 10.0f;
+	float maxHealthPoints = 5.0f;
 
 	UFUNCTION()
 	// Deal damage and return true if curHitPoints <= 0

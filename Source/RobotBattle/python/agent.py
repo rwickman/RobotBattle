@@ -46,11 +46,16 @@ class Agent:
 
             if t < ep_len - 1:
                 ep_dict["returns"][t] += ep_dict["returns"][t+1] * self._args.gamma
-
-        if "values" in ep_dict:
-            ep_dict["adv"] = ep_dict["returns"] - ep_dict["values"]
-
         # Standardize the returns
-        if ep_len > 1:
-            ep_dict["returns"] = (ep_dict["returns"] - np.mean(ep_dict["returns"])) / (np.std(ep_dict["returns"]) + 1e-15)
+        ep_dict["returns"] = ep_dict["returns"]/110.0
+        
+        # if "val_preds" in ep_dict:
+
+        ep_dict["adv"] = ep_dict["returns"] - ep_dict["val_preds"][:, 0, 0]
+
+        
+        
+        print(ep_dict["returns"])
+        #if ep_len > 1:
+        #   ep_dict["returns"] = (ep_dict["returns"] - np.mean(ep_dict["returns"])) / (np.std(ep_dict["returns"]) + 1e-15)
         ep_dict["avg episode return"] = np.mean(ep_dict["returns"])

@@ -82,7 +82,7 @@ void AAIFightingCharacter::MoveToActor(AActor* Goal)
 				}
 				else
 				{
-					SetIsAttacking(false);
+					//SetIsAttacking(false);
 				}
 			}
 		}

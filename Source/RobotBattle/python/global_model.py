@@ -38,7 +38,7 @@ class GlobalModel:
         self._actor_critic = ActorCritic(self._args)
         self._optimizer = tf.keras.optimizers.Adam(learning_rate=self._args.lr)
         # Call the model on fake data to build it
-        fake_state = np.zeros((1, 11, 9))
+        fake_state = np.zeros((1, 6, 9))
         self._actor_critic(fake_state)
         self._actor_critic.summary()
           #self._actor_critic.summary()
@@ -77,11 +77,11 @@ class GlobalModel:
             self._optimizer.apply_gradients(zip(grads, self._actor_critic.trainable_variables))
             return self._actor_critic.get_weights()
 
-    def _create_summary_writers(self):
-        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        actor_log_dir= "logs/fit/" + current_time + "/actor"
-        critic_log_dir= "logs/fit/" + current_time + "/critic"
-        returns_log_dir= "logs/fit/" + current_time + "/returns"
+    def _create_summary_writers(self):   
+        #current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        actor_log_dir= "logs/fit/actor"
+        critic_log_dir= "logs/fit/critic"
+        returns_log_dir= "logs/fit/returns"
         self._actor_summary_writer = tf.summary.create_file_writer(actor_log_dir)
         self._critic_summary_writer = tf.summary.create_file_writer(critic_log_dir)
         self._returns_summary_writer = tf.summary.create_file_writer(returns_log_dir)

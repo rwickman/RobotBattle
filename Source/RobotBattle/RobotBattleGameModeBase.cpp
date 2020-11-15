@@ -8,19 +8,38 @@
 void ARobotBattleGameModeBase::StartPlay()
 {
 	Super::StartPlay();
+
+	// TODO: Encode this in a better way (perhaps create environment blueprint)
+	// Craete spawn locations
+	AgentSpawnLocations.push_back(FVector(577.0f, 405.0f, 120.000008f));
+	AgentSpawnLocations.push_back(FVector(577.0f, 2426.0f, 120.000008f));
+	AgentSpawnLocations.push_back(FVector(2306.0f, 2426.0f, 120.000008f));
+	AgentSpawnLocations.push_back(FVector(2306.0f, 438.0f, 120.000008f));
+
+	AISpawnLocations.push_back(FVector(178.0f, 840.0f, 120.000008f));
+	AISpawnLocations.push_back(FVector(178.0f, 2828.0f, 120.000008f));
+	AISpawnLocations.push_back(FVector(1907.0, 2828.0f, 120.000008f));
+	AISpawnLocations.push_back(FVector(1907.0, 840.0f, 120.000008f));
+
 	FActorSpawnParameters ManagerSpawnParams;
 	ManagerSpawnParams.Name = TEXT("AgentManager");
 	UWorld* World = GetWorld();
-	AAgentPlayerController* AgentPlayerController = World->SpawnActor<AAgentPlayerController>(AAgentPlayerController::StaticClass());
-	if (AgentPlayerController)
+	
+	// Create the AgentControllers
+	for (int i = 0; i < 4; ++i)
 	{
-		AgentPlayerController->SetupCallback = [&]() { SetupGame(0); };
-		AgentControllers.push_back(AgentPlayerController);
+		AAgentPlayerController* AgentPlayerController = World->SpawnActor<AAgentPlayerController>(AAgentPlayerController::StaticClass());
+		if (AgentPlayerController)
+		{
+			AgentPlayerController->SetupCallback = [&, i]() { SetupGame(i); };
+			AgentControllers.push_back(AgentPlayerController);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Couldn't Create agent controller!"));
+		}
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Couldn't Create agent controller!"));
-	}
+	
 	
 	
 	if (World)
@@ -35,6 +54,10 @@ void ARobotBattleGameModeBase::StartPlay()
 
 void ARobotBattleGameModeBase::SetupGame(int ControllerIndex)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 25.0f, FColor::Yellow, TEXT("SetupGame on ControllerIndex ") + FString::FromInt(ControllerIndex));
+	}
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -47,11 +70,10 @@ void ARobotBattleGameModeBase::SetupGame(int ControllerIndex)
 			
 
 			FActorSpawnParameters spawn_params;
-			spawn_params.Name = TEXT("AIPlayerCharacter");
+			spawn_params.Name = FName( *("AIPlayerCharacter_" + FString::FromInt(ControllerIndex)));
 			spawn_params.NameMode = FActorSpawnParameters::ESpawnActorNameMode::Requested;
-			FVector create_loc(1044.0f, 35.0f, 120.000008f);
 
-			APlayerFightingCharacter* AgentFighter= World->SpawnActor<APlayerFightingCharacter>(AgentPlayerClass, create_loc, FRotator::ZeroRotator, spawn_params);
+			APlayerFightingCharacter* AgentFighter= World->SpawnActor<APlayerFightingCharacter>(AgentPlayerClass, AgentSpawnLocations[ControllerIndex], FRotator::ZeroRotator, spawn_params);
 			if (AgentFighter)
 			{
 				if (AgentFighters.Num() > ControllerIndex)
@@ -65,19 +87,22 @@ void ARobotBattleGameModeBase::SetupGame(int ControllerIndex)
 				
 				if (AgentControllers.size() > ControllerIndex && AgentControllers[ControllerIndex])
 				{
+					if (GEngine)
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("AgentController is Possessing AgentFighter"));
+					}
 					AgentControllers[ControllerIndex]->Possess(AgentFighter);
 					//AgentControllers[ControllerIndex]->Setup();
 				}
 	
-				AgentFighter->SetActorLabel(TEXT("PlayerAgentCharacter"));
+				AgentFighter->SetActorLabel(TEXT("PlayerAgentCharacter_")+ FString::FromInt(ControllerIndex));
 				//created_player->ShouldRandomMove = true;
 				AgentFighter->DeadCallback = [&, ControllerIndex](ABaseFightingCharacter* DeadPlayer) {ARobotBattleGameModeBase::RestartGame(DeadPlayer, ControllerIndex); };
 			}
 			
 
-			spawn_params.Name = TEXT("AgentPlayerCharacter");
-			FVector create_loc2(178.0f, 840.0f, 120.000008f);
-			AAIFightingCharacter* AIFighter = World->SpawnActor<AAIFightingCharacter>(AIPlayerClass, create_loc2, FRotator::ZeroRotator, spawn_params);
+			spawn_params.Name = FName( *("AgentPlayerCharacter_" + FString::FromInt(ControllerIndex)));
+			AAIFightingCharacter* AIFighter = World->SpawnActor<AAIFightingCharacter>(AIPlayerClass, AISpawnLocations[ControllerIndex], FRotator::ZeroRotator, spawn_params);
 			if (AIFighter && AgentFighter)
 			{
 				AIFighter->MoveToActor(AgentFighter);

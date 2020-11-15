@@ -36,7 +36,8 @@ bool UHealthComponent::TakeDamage(float damage)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString("INSIDE BASE CHARACTER: ") + FString::SanitizeFloat(GetHealthPoints()));
 	healthPoints -= damage;
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString("Inside TakeDamage: ") + FString::SanitizeFloat(GetHealthPoints()));
+
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString("Inside TakeDamage: ") + FString::SanitizeFloat(GetHealthPoints()));
 	if (healthPoints <= 0.0f)
 	{
 		healthPoints = 0.0f;

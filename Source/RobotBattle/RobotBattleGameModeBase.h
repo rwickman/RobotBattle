@@ -37,6 +37,10 @@ public:
 	
 	std::vector<AAgentPlayerController*> AgentControllers;
 
+	std::vector<FVector> AgentSpawnLocations;
+	std::vector<FVector> AISpawnLocations;
+
+
 private:
 	TArray<APlayerFightingCharacter*> AgentFighters; //created_player
 	TArray<AAIFightingCharacter*> AIFighters;

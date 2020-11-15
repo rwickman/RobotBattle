@@ -65,7 +65,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-	int NumViewLinecast = 10;
+	int NumViewLinecast = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
 	float ViewOffsetX = 25.0f;

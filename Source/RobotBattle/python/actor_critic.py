@@ -7,7 +7,7 @@ tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 VF_COEF = 0.01
 EPSILON_CLIP = 0.2
-ENTROPY_COEF = 0.001
+ENTROPY_COEF = 0#.001
 eps = np.finfo(np.float32).eps.item()
 
 def ppo_loss_discrete(advantage, old_pred, y_true, y_pred, val_true, val_pred):
@@ -27,12 +27,19 @@ def ppo_loss_discrete(advantage, old_pred, y_true, y_pred, val_true, val_pred):
     new_prob = tf.math.log(tf.reduce_sum(y_true * y_pred, axis=-1) + eps)
     old_prob = tf.math.log(tf.reduce_sum(y_true * old_pred, axis=-1) + eps)
     old_prob = tf.cast(old_prob, tf.float32)
+    #print("old_prob: ", old_prob)
+    #print("new_prob: ", new_prob)
+
+
     ratio = tf.exp(new_prob - old_prob)
+    #print("ratio:", ratio)
+    #print("Advantage", advantage)
     surrogate_1 = ratio * advantage
     surrogate_2 = tf.clip_by_value(ratio, 1.0 - EPSILON_CLIP, 1.0 + EPSILON_CLIP) * advantage
     vf_loss = VF_COEF * tf.reduce_mean(tf.square(val_true - val_pred))  
     entropy_pen = -ENTROPY_COEF * tf.reduce_sum(y_pred * tf.math.log(y_pred + 1e-10), axis=1)
     policy_loss = -tf.reduce_mean(tf.minimum(surrogate_1, surrogate_2) + entropy_pen)
+    #print(policy_loss)
     #policy_loss = -tf.reduce_mean(new_prob * advantage)
     return  policy_loss, vf_loss
 
@@ -51,6 +58,7 @@ class ActorCritic(Model):
         self._obj_transform_emb = layers.Conv1D(self._args.obj_emb, kernel_size=1, strides=1, activation="relu") 
 
         self._flatten = layers.Flatten()
+        self._concat_2 = layers.Concatenate()
 
         self._dropout = layers.Dropout(self._args.dropout_rate)
         
@@ -80,6 +88,8 @@ class ActorCritic(Model):
         # Create the object embeddings
         obj_reps = self._obj_transform_emb(tf.cast(obj_reps, tf.float32))
         obj_reps = self._flatten(obj_reps)
+        # Add player state again 
+        obj_reps = self._concat_2([obj_reps, x[:, -1, :-1]])
         obj_reps = self._dropout(obj_reps, training=training)
 
         # Run through stacked LSTM

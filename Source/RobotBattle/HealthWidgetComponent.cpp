@@ -60,10 +60,12 @@ void UHealthWidgetComponent::SetHealthPercentage(float healthProgress)
 {
 	if (currentWidget)
 	{
+		/*
 		if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Updating health progress!");
 		}
+		*/
 		currentWidget->healthProgress = healthProgress <= 0.0f ? 0.0f : healthProgress;
 	}
 	else

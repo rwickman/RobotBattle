@@ -35,5 +35,6 @@ private:
 	void AcceptConnection();
 	tcp::acceptor acceptor_;
 	std::vector<AAgentPlayerController*> AgentControllers;
+	int CurController = 0;
 
 };

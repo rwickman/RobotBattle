@@ -39,10 +39,11 @@ void AgentSession::StartSession()
 
 void AgentSession::ReadActionHeader()
 {
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("Reading action header"));
-	}
+	}*/
 
 	auto self(shared_from_this());
 
@@ -58,12 +59,13 @@ void AgentSession::ReadActionHeader()
 }
 void AgentSession::ReadActionBody()
 {
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("Reading action"));
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, FString::FromInt(ActionPacket.GetBodyLength()));
-		
 	}
+	*/
 
 	auto self(shared_from_this());
 	boost::asio::async_read(socket_, boost::asio::buffer(ActionPacket.GetBody(), ActionPacket.GetBodyLength()),
@@ -71,37 +73,22 @@ void AgentSession::ReadActionBody()
 		{
 			if (!ec)
 			{
+				/*
 				if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, "INSIDE ACTION READ BODY");
 				}
+				
 				if (GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, ActionPacket.GetBody());
-				}
+				}*/
+				
 				
 				char* CurBodyContent = new char [ActionPacket.GetBodyLength()];
-				
-				//char question1 [10];
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, "GETTIGN BODY CONTENT");
-				}
 				ActionPacket.GetBodyContent(CurBodyContent);
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "CurBodyContent");
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, CurBodyContent);
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::FromInt(ActionPacket.GetBodyLength()));
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "CurBodyContent");
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, "SETTING ACTION");
-				}
 				AgentController->SetAction(FString(CurBodyContent));
 				delete CurBodyContent;
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, "Calling WriteState");
-				}
 				WriteState();
 			}
 		});
@@ -110,10 +97,12 @@ void AgentSession::ReadActionBody()
 
 void AgentSession::ReadRestart()
 {
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("Read Restart"));
 	}
+	*/
 
 	auto self(shared_from_this());
 	socket_.async_read_some(boost::asio::buffer(ActionPacket.GetData(), DataPacket.HEADER_LENGTH),
@@ -122,10 +111,12 @@ void AgentSession::ReadRestart()
 
 		if (!ec && ActionPacket.DecodeHeader())
 		{
+			/*
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("Restart read!"));
 			}
+			*/
 			// Setup up the next game
 			AgentController->ShouldSetup = true;
 			// Write the first state of the episode
@@ -133,10 +124,12 @@ void AgentSession::ReadRestart()
 			SetupComplete = false;
 			std::unique_lock<std::mutex> lk(io_Mutex);
 			Setup_CV.wait(lk, [&] {return SetupComplete; });
+			/*
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Purple, TEXT("Setup Complete"));
 			}
+			*/
 			WriteState();
 		}
 	});
@@ -145,11 +138,12 @@ void AgentSession::ReadRestart()
 
 void AgentSession::WriteState()
 {
-
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Green, TEXT("Writing State!!"));
 	}
+	*/
 	// Get the current state/reward
 	StateCaptured = false;
 	AgentController->RequestState();
@@ -196,7 +190,6 @@ void AgentSession::WriteState()
 			{
 				if (IsEpisodeTerminated)
 				{
-					// TODO: Wait for the agent to respond that it is ready for another episode
 					ReadRestart();
 				}
 				else
@@ -210,10 +203,12 @@ void AgentSession::WriteState()
 
 void AgentSession::EnableSetupComplete()
 {
+	/*
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Purple, TEXT("EnableSetupComplete"));
 	}
+	*/
 	SetupComplete = true;
 	Setup_CV.notify_one();
 }

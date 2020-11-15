@@ -33,12 +33,11 @@ void AgentServer::StartListening()
 		{
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("ACCEPTING"));
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, FString::FromInt(CurController));
 			}
-			if (!ec && AgentControllers.size() > 0)
+			if (!ec && AgentControllers.size() > CurController)
 			{
-				std::make_shared<AgentSession>(std::move(socket), AgentControllers.back())->StartSession();
-				//AgentControllers.pop_back();
+				std::make_shared<AgentSession>(std::move(socket), AgentControllers[CurController++])->StartSession();
 			}
 			StartListening();
 		});

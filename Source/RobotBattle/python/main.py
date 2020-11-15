@@ -1,6 +1,7 @@
-import argparse
-import json
+import argparse, threading
 import numpy as np
+
+NUM_AGENTS = 4
 
 # from actor_critic import ActorCritic
 from global_model import GlobalModel
@@ -11,10 +12,20 @@ from agent_train_data import AgentTrainData
 def main(args):
     global_model = GlobalModel(args)
 
-    agent_client = AgentClient(args)
-    agent_train_data = AgentTrainData(args)
-    rl_agent = RLAgent(args, agent_client, agent_train_data, global_model)
-    rl_agent.start_training()
+    agents = []
+    for i in range(NUM_AGENTS):
+        agent_client = AgentClient(args)
+        agent_train_data = AgentTrainData(args, i)
+        rl_agent = RLAgent(args, agent_client, agent_train_data, global_model)
+        agent_worker = threading.Thread(target=rl_agent.start_training)
+        agent_worker.start()
+        agents.append(agent_worker)
+
+    # agent_client = AgentClient(args)
+    # agent_train_data = AgentTrainData(args)
+    # rl_agent = RLAgent(args, agent_client, agent_train_data, global_model)
+    # rl_agent.start_training()
+
     #actor_critic_model = ActorCritic(args)
 
 
@@ -23,11 +34,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=5,
+    parser.add_argument("--epochs", type=int, default=2,
             help="Number of epochs to train on each episode.")
     parser.add_argument("--episodes", type=int, default=100000,
             help="Number of episodes to train on.")
-    parser.add_argument("--lr", type=float, default=5e-5,
+    parser.add_argument("--lr", type=float, default=1e-5,
             help="The learning rate.")
     parser.add_argument("--gamma", type=float, default=0.99,
             help="The learning rate.")
