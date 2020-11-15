@@ -1,11 +1,13 @@
 import numpy as np
 from agent_train_data import LocationID
 
+from actor_critic import ActorCritic
+
 class Agent:
-    def __init__(self, args, agent_client, agent_train_data):
+    def __init__(self, args, agent_train_data):
         self._args = args
-        self._agent_client = agent_client
         self._agent_train_data = agent_train_data
+        self.model_weights_dir = "model/actor_critic"
 
     def _parse_state(self, state_dict):
         state_input = []
@@ -59,3 +61,12 @@ class Agent:
         #if ep_len > 1:
         #   ep_dict["returns"] = (ep_dict["returns"] - np.mean(ep_dict["returns"])) / (np.std(ep_dict["returns"]) + 1e-15)
         ep_dict["avg episode return"] = np.mean(ep_dict["returns"])
+
+
+    def _clone_global_model(self):
+        """Clone the global model."""
+        cloned_model = ActorCritic(self._args)
+        if self._args.load_model:
+            cloned_model.load_weights(self.model_weights_dir)
+        #cloned_model.set_weights(self._actor_critic.get_weights())
+        return cloned_model

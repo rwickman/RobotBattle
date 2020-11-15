@@ -1,4 +1,4 @@
-import datetime, json, os, threading
+import datetime, json, os, multiprocessing
 import numpy as np
 import tensorflow as tf
 
@@ -7,7 +7,7 @@ from actor_critic import ActorCritic
 class GlobalModel:
     def __init__(self, args):
         self._args = args
-        self._train_lock = threading.Lock()
+        self._train_lock = multiprocessing.Lock()
         self._global_training_json = "model/global_training.json"
         self.model_weights_dir = "model/actor_critic"
         self.optim_ckpt_dir = "model/optim_ckpts"

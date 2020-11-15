@@ -4,22 +4,33 @@ import tensorflow as tf
 from tensorflow.python.ops import gradients
 import time
 from actor_critic import ppo_loss_discrete
+from client import AgentClient
 
 class RLAgent(Agent):
-    def __init__(self, args, agent_client, agent_train_data, global_model):
-        super().__init__(args, agent_client, agent_train_data)
-        self._global_model = global_model
-        self._local_model = global_model.clone()
-        
-    def start_training(self):
+    def __init__(self, args, agent_train_data, global_model):
+        print("Calling super")
+        super().__init__(args, agent_train_data)
+        #self._global_model = global_model
+        #self._local_model = global_model.clone()
+        #self.start_training()
+
+    def start_training(self, grad_lock, train_queue):
+        self._grad_lock = grad_lock
+        self._train_queue = train_queue
+        print("start_training")
         # Connect to remote agent
+        self._local_model = self._clone_global_model()
+        self._agent_client = AgentClient(self._args)
         self._agent_client.connect()
 
         # Start running episodes
         for i in range(self._args.episodes):
             ep_dict = self._run_episode()
             print("Done running episode")
-            self._train_model(ep_dict)
+            ep_len = ep_dict["states"].shape[0]
+            # Skip first episode as agent response is delayed
+            if i > 0:
+                self._train_model(ep_dict)
             self._reset()
 
     def _run_episode(self):
@@ -137,17 +148,32 @@ class RLAgent(Agent):
             for i in range(len(sum_grad)):
                 sum_grad[i] = sum_grad[i] / ep_len
             
+            
+            avg_actor_loss = total_actor_loss / (ep_len)
+            avg_critic_loss = total_critic_loss / (ep_len)
             # Apply the gradients to global model and update local model weights
-            self._local_model.set_weights(self._global_model.apply_gradients(sum_grad))
+            self._grad_lock.acquire()
+            print("Done training")
+            # Put the local gradients
+            self._train_queue.put([
+                grads,
+                avg_actor_loss,
+                avg_critic_loss,
+                ep_dict["avg episode return"]])
+            # Get the global weights
+            self._local_model.set_weights(self._train_queue.get())
+            #global_weights = train_queue.get()
+            self._grad_lock.release()
+            #self._local_model.set_weights(self._global_model.apply_gradients(sum_grad))
 
         # Compute average loss
         avg_actor_loss = total_actor_loss / (ep_len * self._args.epochs)
         avg_critic_loss = total_critic_loss / (ep_len * self._args.epochs)
         print("avg_actor_loss: ", avg_actor_loss)
         print("avg_critic_loss: ", avg_critic_loss)
-        self._global_model.save_rl_episode(
-            avg_actor_loss,
-            avg_critic_loss,
-            ep_dict["avg episode return"])
+        # self._global_model.save_rl_episode(
+        #     avg_actor_loss,
+        #     avg_critic_loss,
+        #     ep_dict["avg episode return"])
         
         self._agent_train_data.save()

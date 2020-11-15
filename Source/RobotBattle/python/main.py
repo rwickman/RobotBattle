@@ -1,40 +1,48 @@
 import argparse, threading
+from multiprocessing import Process, Queue, Lock
 import numpy as np
 
-NUM_AGENTS = 4
-
+MAX_AGENTS = 4
 # from actor_critic import ActorCritic
 from global_model import GlobalModel
 from rl_agent import RLAgent
-from client import AgentClient
+
 from agent_train_data import AgentTrainData
 
 def main(args):
-    global_model = GlobalModel(args)
+    if args.num_agents > MAX_AGENTS:
+        args.num_agents = MAX_AGENTS
 
+    global_model = GlobalModel(args)
+    train_queue = Queue(maxsize=1)
+    grad_lock = Lock()
     agents = []
-    for i in range(NUM_AGENTS):
-        agent_client = AgentClient(args)
+    for i in range(args.num_agents):
+        #agent_client = AgentClient(args)
         agent_train_data = AgentTrainData(args, i)
-        rl_agent = RLAgent(args, agent_client, agent_train_data, global_model)
-        agent_worker = threading.Thread(target=rl_agent.start_training)
+        rl_agent = RLAgent(args, agent_train_data, global_model)
+        #agent_worker = threading.Thread(target=rl_agent.start_training)
+        agent_worker = Process(target=rl_agent.start_training, args=(grad_lock, train_queue))
+        #agent_worker = Process(target=RLAgent, args=(args, agent_train_data, global_model))
         agent_worker.start()
+        print("Called Start")
         agents.append(agent_worker)
 
-    # agent_client = AgentClient(args)
-    # agent_train_data = AgentTrainData(args)
-    # rl_agent = RLAgent(args, agent_client, agent_train_data, global_model)
-    # rl_agent.start_training()
-
-    #actor_critic_model = ActorCritic(args)
-
-
-
-
+    for i in range(args.episodes * args.num_agents):
+        train_list = train_queue.get()
+        global_weights = global_model.apply_gradients(train_list[0])
+        global_model.save_rl_episode(
+            train_list[1],
+            train_list[2],
+            train_list[3]
+        )
+        train_queue.put(global_weights)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=2,
+    parser.add_argument("--epochs", type=int, default=1,
+            help="Number of epochs to train on each episode.")
+    parser.add_argument("--num_agents", type=int, default=2,
             help="Number of epochs to train on each episode.")
     parser.add_argument("--episodes", type=int, default=100000,
             help="Number of episodes to train on.")
